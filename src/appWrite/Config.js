@@ -24,7 +24,8 @@ export class Service {
                 userId,
             });
         } catch (error) {
-            throw error;
+            console.log("Appwrite Service :: createPost :: error", error);
+            return false;
         }
     }
 
@@ -37,7 +38,8 @@ export class Service {
                 status,
             });
         } catch (error) {
-            throw error;
+            console.log("Appwrite Service :: updatePost :: error", error);
+            return false;
         }
     }
 
@@ -55,6 +57,7 @@ export class Service {
             return await this.databases.getDocument(conf.appwriteDataBaseId, conf.appwriteCollectionId, slug);
         } catch (error) {
             console.log("Appwrite Service :: getPost :: error", error);
+            return false;
         }
     }
 
