@@ -3,38 +3,38 @@ import appwriteService from "../appWrite/Config";
 import { Container, PostCard } from "../components/index";
 
 function Home() {
-    const [posts, setPosts] = useState([]);
-    useEffect(() => {
-        appwriteService.getPosts([]).then((posts) => {
-            if (posts) {
-                setPosts(posts.documents);
-            }
-        });
-    }, []);
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    appwriteService.getPosts([]).then((posts) => {
+      if (posts) {
+        setPosts(posts.documents);
+      }
+    });
+  }, []);
 
-    if (posts.length == 0) {
-        return (
-            <div className="py-8">
-                <Container>
-                    <h1 className="text-3xl font-bold">No Posts Found</h1>
-                </Container>
-            </div>
-        );
-    }
-
+  if (posts.length == 0) {
     return (
-        <div className="w-full py-8">
-            <Container>
-                <div className="flex flex-wrap">
-                    {posts.map((pos) => (
-                        <div key={pos.$id} className="p-2 w-1/4">
-                            <PostCard {...pos} />
-                        </div>
-                    ))}
-                </div>
-            </Container>
-        </div>
+      <div className="py-8">
+        <Container>
+          <h1 className="text-3xl font-bold">No Posts Found</h1>
+        </Container>
+      </div>
     );
+  }
+
+  return (
+    <div className="w-full py-8">
+      <Container>
+        <div className="flex flex-wrap">
+          {posts.map((pos) => (
+            <div key={pos.$id} className="p-2 w-1/4">
+              <PostCard {...pos} />
+            </div>
+          ))}
+        </div>
+      </Container>
+    </div>
+  );
 }
 
 export default Home;
