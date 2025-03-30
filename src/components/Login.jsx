@@ -1,4 +1,4 @@
-import React, { usestate } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login as authLogin } from "../store/AuthSlice";
 import { Button, Input, Logo } from "../components/index";
@@ -10,19 +10,21 @@ function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { register, handleSubmit } = useForm();
-  const [error, setError] = usestate("");
+  const [showError, setShowError] = useState("");
 
   const login = async (data) => {
-    setError("");
+    setShowError("");
     try {
-      const session = await authService.login(data);
+      let email = data.email;
+      let password = data.password;
+      const session = await authService.login(email, password);
       if (session) {
         const userData = await authService.getCurrentUser();
         if (userData) dispatch(authLogin(userData));
         navigate("/");
       }
     } catch (error) {
-      setError(error.message);
+      setShowError(error.message);
     }
   };
   return (
@@ -47,7 +49,9 @@ function Login() {
             Sign Up
           </Link>
         </p>
-        {error && <p className="text-red-600 mt-8 text-center">{error}</p>}
+        {showError && (
+          <p className="text-red-600 mt-8 text-center">{showError}</p>
+        )}
         <form onSubmit={handleSubmit(login)} className="mt-8">
           <div className="sapce-y-5">
             <Input

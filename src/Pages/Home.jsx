@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import appwriteService from "../appWrite/Config";
 import { Container, PostCard } from "../components/index";
+import { useParams } from "react-router-dom";
 
 function Home() {
+  const { slug } = useParams();
   const [posts, setPosts] = useState([]);
   useEffect(() => {
     appwriteService.getPosts([]).then((posts) => {
@@ -13,7 +15,7 @@ function Home() {
   }, []);
 
   if (posts.length == 0) {
-    return (
+     return (
       <div className="py-8">
         <Container>
           <h1 className="text-3xl font-bold">No Posts Found</h1>
