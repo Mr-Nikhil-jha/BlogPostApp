@@ -8,7 +8,6 @@ function Button({
   className = "",
   ...props
 }) {
-  console, console.log(children);
 
   return (
     <button
