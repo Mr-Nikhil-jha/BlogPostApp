@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import appwriteService from "../appWrite/Config";
-import { Button, Container } from "../components/index";
 import parse from "html-react-parser";
-import { useSelector } from "react-redux";
-import { set } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { setPost } from "../store/PostSlice";
 
 export default function Post() {
-    const [post, setPost] = useState(null);
+    const [post, setPosts] = useState(null);
     let [show, setShow] = useState(false);
     const { slug } = useParams();
     const navigate = useNavigate();
+    let dispatch = useDispatch();
 
     const userData = useSelector((state) => state.auth.userData);
 
@@ -21,13 +21,26 @@ export default function Post() {
     useEffect(() => {
         if (postInStore.length > 0) {
             let filteredBlogs = postInStore.filter((blog) => blog.$id === slug);
-            setPost(filteredBlogs[0]);
+            if (filteredBlogs.length == 0) {
+                if (slug) {
+                    appwriteService.getPost(slug).then((post) => {
+                        if (post) {
+                            setPosts(post);
+                            dispatch(setPost(post.documents));
+                        } else navigate("/");
+                    });
+                }
+            } else {
+                setPosts(filteredBlogs[0]);
+            }
             // navigate("/");
         } else if (postInStore.length === 0) {
             if (slug) {
                 appwriteService.getPost(slug).then((post) => {
-                    if (post) setPost(post);
-                    else navigate("/");
+                    if (post) {
+                        setPosts(post);
+                        dispatch(setPost(post.documents));
+                    } else navigate("/");
                 });
             }
         } else navigate("/");
@@ -37,6 +50,7 @@ export default function Post() {
         appwriteService.deletePost(post.$id).then((status) => {
             if (status) {
                 appwriteService.deleteFile(post.featuredImg);
+                dispatch(setPost([]));
                 navigate("/");
             }
         });

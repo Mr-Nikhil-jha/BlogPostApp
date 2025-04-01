@@ -7,8 +7,11 @@ import Rte from "../Rte";
 import appwriteService from "../../appWrite/Config";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import Loader from "../Loader";
 
 function PostForm({ post }) {
+    let [imgSrc, setImgSrc] = React.useState("");
+    let [loading, setLoading] = React.useState(false);
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
             title: post?.title || "",
@@ -17,6 +20,15 @@ function PostForm({ post }) {
             status: post?.status || "active",
         },
     });
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => setImgSrc(reader.result);
+            reader.readAsDataURL(file);
+        }
+    };
 
     const navigate = useNavigate();
 
@@ -55,6 +67,8 @@ function PostForm({ post }) {
 
                 if (dbpost) {
                     navigate(`/post/${dbpost.$id}`);
+                    setImgSrc("");
+                    setLoading(false);
                 }
             }
         }
@@ -98,19 +112,23 @@ function PostForm({ post }) {
                             shouldValidate: true,
                         });
                     }}
+                    onChange={(e) => {
+                        handleImageUpload(e);
+                    }}
                 />
                 <Rte label="Content :" name="content" control={control} defaultValue={getValues("content")} />
             </div>
             <div className="w-1/3 px-2">
-                <Input label="Featured Image :" type="file" className="mb-4" accept="image/png, image/jpg, image/jpeg, image/gif" {...register("image", { required: !post })} />
+                <Input label="Featured Image :" type="file" className="mb-4" accept="image/png, image/jpg, image/jpeg, image/gif" {...register("image", { required: !post })} onChange={(e) => handleImageUpload(e)} />
                 {post && (
                     <div className="w-full mb-4">
                         <img src={appwriteService.getFilePreview(post.featuredImg)} alt={post.title} className="rounded-lg" />
                     </div>
                 )}
+                <div className="p-4 -mt-1">{imgSrc && <img src={imgSrc} alt="Preview" className="mt-4 max-w-sm rounded-lg shadow-md w-80" />}</div>
                 <Select options={["active", "inactive"]} label="Status" className="mb-4" {...register("status", { required: true })} />
-                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full">
-                    {post ? "Update" : "Submit"}
+                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full cursor-pointer">
+                    {post ? `${loading ? <Loader /> : "Update"}` : `${loading ? <Loader /> : "Submit"}`}
                 </Button>
             </div>
         </form>

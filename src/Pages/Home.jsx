@@ -1,32 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import store from "../store/Store";
 import appwriteService from "../appWrite/Config";
 import { Container, PostCard } from "../components/index";
-import { useParams } from "react-router-dom";
 import { setPost } from "../store/PostSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useLoaderData } from "react-router-dom";
+import Login from "../components/Login";
 
 function Home() {
-    const postData = useSelector((state) => state.post.post);
     const dispatch = useDispatch();
-    const [posts, setPosts] = useState([]);
+    const postData = useSelector((state) => state.post.post);
+    const AllPostData = useLoaderData();
+
     useEffect(() => {
-        if (postData.length > 0) {
-            setPosts(postData);
-        } else {
+        if (!AllPostData || AllPostData.length === 0) {
             appwriteService.getPosts([]).then((posts) => {
-                if (posts) {
-                    setPosts(posts.documents);
+                if (posts?.documents) {
                     dispatch(setPost(posts.documents));
                 }
             });
+        } else {
+            dispatch(setPost(AllPostData));
         }
-    }, []);
+    }, [AllPostData, dispatch, setPost]);
 
-    if (posts.length == 0) {
+    if (!postData || postData.length === 0) {
         return (
-            <div className="py-8">
+            <div className="w-full py-3">
                 <Container>
-                    <h1 className="text-3xl font-bold">No Posts Found</h1>
+                    {/* <div className="PY-6"> */}
+                    <h1>No Posts</h1>
+                    {/* </div> */}
                 </Container>
             </div>
         );
@@ -36,9 +40,9 @@ function Home() {
         <div className="w-full py-8">
             <Container>
                 <div className="flex flex-wrap">
-                    {posts.map((pos) => (
-                        <div key={pos.$id} className="p-2 w-1/4">
-                            <PostCard {...pos} />
+                    {postData.map((post) => (
+                        <div key={post.$id} className="p-2 w-1/4">
+                            <PostCard {...post} />
                         </div>
                     ))}
                 </div>
@@ -48,3 +52,8 @@ function Home() {
 }
 
 export default Home;
+
+export const getAllPostsDataForHome = () => {
+    const postData = store.getState().post.post;
+    return postData?.length > 0 ? postData : [];
+};
